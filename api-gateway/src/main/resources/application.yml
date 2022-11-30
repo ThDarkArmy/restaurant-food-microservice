@@ -11,10 +11,20 @@ spring:
           uri: lb://RESTAURANT-SERVICE
           predicates:
             - Path=/restaurants/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: RESTAURANT-SERVICE
+                fallbackuri: forward:/restaurantServiceFallBack
         - id: FOOD-ITEM-SERVIVCE
           uri: lb://FOOD-ITEM-SERVICE
           predicates:
             - Path=/foodItems/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: FOOD-ITEM-SERVICE
+                fallbackuri: forward:/foodServiceFallBack
 
 
 eureka:
@@ -25,3 +35,18 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
   instance:
     hostname: localhost
+
+hystrix:
+  command:
+    fallbackcmd:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
